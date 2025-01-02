@@ -5,10 +5,16 @@ from .models import Profile, Deposit, PurchaseHistory, Wishlist
 
 class ProfileSerializer(serializers.ModelSerializer):
     user = User
-
+    balance = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
     class Meta:
         model = Profile
-        fields = ['user', 'image', 'contact_info', 'shopping_preferences']
+        fields = ['id', 'user', 'image', 'balance', 'contact_info', 'shopping_preferences']
+
+    def create(self, validated_data):
+        # Set the default balance to 0 when creating a new profile
+        validated_data['balance'] = 0.00
+        profile = super().create(validated_data)
+        return profile
 
 
 class DepositSerializer(serializers.ModelSerializer):

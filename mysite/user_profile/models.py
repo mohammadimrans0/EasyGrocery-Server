@@ -4,9 +4,10 @@ from product.models import Product
 
 # Create your models here.
 class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
-    image = models.ImageField(upload_to='user/upload/images/')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='user')
+    image = models.ImageField(upload_to='user_profile/upload/images/')
     contact_info = models.CharField(max_length=255, blank=True, null=True)
+    balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     shopping_preferences = models.TextField(blank=True, null=True)
     balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
@@ -15,7 +16,7 @@ class Profile(models.Model):
 
 
 class Deposit(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='deposits')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='deposit')
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
 
