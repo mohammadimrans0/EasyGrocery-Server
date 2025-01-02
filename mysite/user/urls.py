@@ -1,14 +1,14 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from .views import UserViewSet, ProfileViewSet, DepositViewSet, PurchaseHistoryViewSet, WishlistViewSet
-
-router = DefaultRouter()
-router.register(r'users', UserViewSet)
-router.register(r'profiles', ProfileViewSet)
-router.register(r'deposits', DepositViewSet)
-router.register(r'purchase-history', PurchaseHistoryViewSet)
-router.register(r'wishlist', WishlistViewSet)
+from django.urls import path
+from .views import (
+    UserRegistrationApiView,
+    UserLoginApiView,
+    UserLogoutApiView,
+    activate,
+)
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path('register/', UserRegistrationApiView.as_view(), name='register'),
+    path('login/', UserLoginApiView.as_view(), name='login'),
+    path('logout/', UserLogoutApiView.as_view(), name='logout'),
+    path('activate/<str:uid64>/<str:token>/', activate, name='activate'),
 ]

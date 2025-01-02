@@ -1,6 +1,6 @@
 from django.db import models
 from category.models import Category
-from user.models import User
+from django.contrib.auth.models import User
 
 class Product(models.Model):
     name = models.CharField(max_length=255)
