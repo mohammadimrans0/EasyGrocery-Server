@@ -1,10 +1,17 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Profile, Deposit, PurchaseHistory, Wishlist
+from .models import Profile, Deposit, PurchaseHistory
+from product.serializers import ProductSerializer
+from product.models import Product
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'email']
 
 
 class ProfileSerializer(serializers.ModelSerializer):
-    user = User
+    user = UserSerializer()
     balance = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
     class Meta:
         model = Profile
@@ -27,17 +34,9 @@ class DepositSerializer(serializers.ModelSerializer):
 
 class PurchaseHistorySerializer(serializers.ModelSerializer):
     user = User
-    product = serializers.StringRelatedField()
+    product_name = serializers.CharField(source='product.name', read_only=True)
 
     class Meta:
         model = PurchaseHistory
-        fields = ['user', 'product', 'quantity', 'purchased_at']
+        fields = ['user', 'product_name', 'quantity', 'purchased_at']
 
-
-class WishlistSerializer(serializers.ModelSerializer):
-    user = User
-    product = serializers.StringRelatedField()
-
-    class Meta:
-        model = Wishlist
-        fields = ['user', 'product', 'added_at']

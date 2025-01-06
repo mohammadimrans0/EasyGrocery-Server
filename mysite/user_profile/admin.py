@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Profile, Deposit, PurchaseHistory, Wishlist
+from .models import Profile, Deposit, PurchaseHistory
 
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
@@ -20,8 +20,3 @@ class PurchaseHistoryAdmin(admin.ModelAdmin):
     search_fields = ('user__username', 'product__name')
     list_filter = ('purchased_at',)
 
-@admin.register(Wishlist)
-class WishlistAdmin(admin.ModelAdmin):
-    list_display = ('user', 'product', 'added_at')
-    search_fields = ('user__username', 'product__name')
-    list_filter = ('added_at',)

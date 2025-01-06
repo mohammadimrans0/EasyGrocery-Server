@@ -3,8 +3,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.db import transaction
 
-from .models import Profile, Deposit, PurchaseHistory, Wishlist
-from .serializers import ProfileSerializer, DepositSerializer, PurchaseHistorySerializer, WishlistSerializer
+from .models import Profile, Deposit, PurchaseHistory
+from .serializers import ProfileSerializer, DepositSerializer, PurchaseHistorySerializer
 from django.contrib.auth.models import User
 
 # Viewset for Profile
@@ -37,7 +37,3 @@ class PurchaseHistoryViewSet(viewsets.ModelViewSet):
     queryset = PurchaseHistory.objects.all()
     serializer_class = PurchaseHistorySerializer
 
-# Viewset for Wishlist
-class WishlistViewSet(viewsets.ModelViewSet):
-    queryset = Wishlist.objects.all()
-    serializer_class = WishlistSerializer
