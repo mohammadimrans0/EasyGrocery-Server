@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Profile, Deposit, PurchaseHistory
+from .models import Profile, Deposit, AddToCart, Checkout, PurchaseHistory, WishlistItem
 
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
@@ -12,11 +12,27 @@ class DepositAdmin(admin.ModelAdmin):
     list_display = ('user', 'amount', 'created_at')
     search_fields = ('user__username',)
     list_filter = ('created_at',)
-    ordering = ('-created_at',)
+
+@admin.register(AddToCart)
+class AddToCartAdmin(admin.ModelAdmin):
+    list_display = ('user', 'product', 'quantity', 'added_at')
+    search_fields = ('user__username', 'product__name')
+
+
+@admin.register(Checkout)
+class CheckoutAdmin(admin.ModelAdmin):
+    list_display = ('user', 'total_amount') 
+    search_fields = ('user__username',)  
 
 @admin.register(PurchaseHistory)
 class PurchaseHistoryAdmin(admin.ModelAdmin):
-    list_display = ('user', 'product', 'quantity', 'purchased_at')
+    list_display = ('user', 'product', 'purchased_at')
     search_fields = ('user__username', 'product__name')
     list_filter = ('purchased_at',)
+
+@admin.register(WishlistItem)
+class WishlistItemAdmin(admin.ModelAdmin):
+    list_display = ('user', 'product', 'added_at')
+    list_filter = ('user', 'added_at')
+    search_fields = ('user__username', 'product__name')
 

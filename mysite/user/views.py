@@ -82,6 +82,16 @@ class UserLogoutApiView(APIView):
             return Response({"error": "No active session or token found."})
 
 
+# reset password
+class ResetPasswordView(APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = ResetPasswordSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "Password reset successful."}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 # Activate account
 def activate(request, uid64, token):
     try:

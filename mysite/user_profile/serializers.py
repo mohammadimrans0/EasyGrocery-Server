@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Profile, Deposit, PurchaseHistory
+from .models import Profile, Deposit, AddToCart, Checkout, PurchaseHistory, WishlistItem
 from product.serializers import ProductSerializer
 from product.models import Product
 
@@ -32,11 +32,26 @@ class DepositSerializer(serializers.ModelSerializer):
         fields = ['user', 'amount', 'created_at']
 
 
-class PurchaseHistorySerializer(serializers.ModelSerializer):
-    user = User
-    product_name = serializers.CharField(source='product.name', read_only=True)
+class AddToCartSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AddToCart
+        fields = ['id', 'user', 'product', 'quantity', 'added_at']
 
+
+class CheckoutSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Checkout
+        fields = ['id', 'user', 'total_amount', 'created_at']
+
+
+class PurchaseHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = PurchaseHistory
-        fields = ['user', 'product_name', 'quantity', 'purchased_at']
+        fields = ('id', 'user', 'product', 'purchased_at')
+
+
+class WishlistItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WishlistItem
+        fields = ['id', 'user', 'product', 'added_at']
 
