@@ -22,13 +22,14 @@ ALLOWED_HOSTS = ["*"]
 
 CSRF_TRUSTED_ORIGINS = [
     'https://8000-idx-easygrocery-1735744862938.cluster-7ubberrabzh4qqy2g4z7wgxuw2.cloudworkstations.dev',
-    'http://127.0.0.1:8000',
-    'http://localhost:8000',
+    'https://3000-idx-easygrocery-1735717909998.cluster-fu5knmr55rd44vy7k7pxk74ams.cloudworkstations.dev',
+    'https://easygrocery-server.onrender.com',
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
     "https://3000-idx-easygrocery-1735717909998.cluster-fu5knmr55rd44vy7k7pxk74ams.cloudworkstations.dev",
+    'https://3000-idx-easygrocery-1735717909998.cluster-fu5knmr55rd44vy7k7pxk74ams.cloudworkstations.dev',
+    'https://easygrocery-server.onrender.com',
 ]
 
 

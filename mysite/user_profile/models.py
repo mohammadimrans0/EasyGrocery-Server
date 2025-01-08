@@ -5,14 +5,13 @@ from product.models import Product
 # Create your models here.
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='user')
-    image = models.ImageField(upload_to='user_profile/upload/images/')
+    image = models.ImageField(upload_to='user_profile/upload/images/', default='user_profile/upload/images/avatar.jpg')
     contact_info = models.CharField(max_length=255, blank=True, null=True)
     balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     shopping_preferences = models.TextField(blank=True, null=True)
-    balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
     def __str__(self):
-        return self.user.username
+        return f"{self.user.username}'s Profile"
 
 
 class Deposit(models.Model):

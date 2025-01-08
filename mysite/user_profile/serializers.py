@@ -4,14 +4,8 @@ from .models import Profile, Deposit, AddToCart, Checkout, PurchaseHistory, Wish
 from product.serializers import ProductSerializer
 from product.models import Product
 
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['first_name', 'last_name', 'email']
-
-
 class ProfileSerializer(serializers.ModelSerializer):
-    user = UserSerializer()
+    user = User
     balance = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
     class Meta:
         model = Profile
