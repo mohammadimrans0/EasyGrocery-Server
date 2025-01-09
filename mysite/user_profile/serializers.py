@@ -1,13 +1,18 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import Profile, Deposit, AddToCart, Checkout, PurchaseHistory, WishlistItem
-from product.serializers import ProductSerializer
+# from product.serializers import ProductSerializer
 from product.models import Product
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'first_name', 'last_name']
+
+class ProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = ['id', 'name', 'image', 'price', 'stock']
 
 
 class ProfileSerializer(serializers.ModelSerializer):
@@ -25,7 +30,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 
 class DepositSerializer(serializers.ModelSerializer):
-    user = User
+    user = UserSerializer()
 
     class Meta:
         model = Deposit
@@ -33,24 +38,31 @@ class DepositSerializer(serializers.ModelSerializer):
 
 
 class AddToCartSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+    product = ProductSerializer()
     class Meta:
         model = AddToCart
         fields = ['id', 'user', 'product', 'quantity', 'added_at']
 
 
 class CheckoutSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
     class Meta:
         model = Checkout
         fields = ['id', 'user', 'total_amount', 'created_at']
 
 
 class PurchaseHistorySerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+    product = ProductSerializer()
     class Meta:
         model = PurchaseHistory
         fields = ('id', 'user', 'product', 'purchased_at')
 
 
 class WishlistItemSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+    product = ProductSerializer()
     class Meta:
         model = WishlistItem
         fields = ['id', 'user', 'product', 'added_at']
