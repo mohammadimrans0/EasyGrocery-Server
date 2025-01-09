@@ -1,5 +1,7 @@
 from rest_framework import viewsets
 from rest_framework.response import Response
+from rest_framework.generics import RetrieveAPIView
+from rest_framework.exceptions import NotFound
 from rest_framework.decorators import action
 from rest_framework import status
 from django.db import transaction
@@ -12,6 +14,16 @@ from django.contrib.auth.models import User
 class ProfileViewSet(viewsets.ModelViewSet):
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
+
+    @action(detail=False, methods=['get'], url_path='user/(?P<user_id>[^/.]+)')
+    def by_user_id(self, request, user_id=None):
+        try:
+            profile = Profile.objects.get(user__id=user_id)
+        except Profile.DoesNotExist:
+            raise NotFound(detail="Profile not found for the given user ID")
+        serializer = self.get_serializer(profile)
+        return Response(serializer.data)
+
 
 # Viewset for Deposit money
 class DepositViewSet(viewsets.ModelViewSet):
