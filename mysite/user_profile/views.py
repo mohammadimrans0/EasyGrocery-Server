@@ -10,10 +10,7 @@ from django.db import transaction
 from .models import Profile, Deposit, AddToCart, Checkout, PurchaseHistory, WishlistItem
 from .serializers import ProfileSerializer, DepositSerializer, AddToCartSerializer, CheckoutSerializer, PurchaseHistorySerializer, WishlistItemSerializer
 from django.contrib.auth.models import User
-from django.contrib.auth import authenticate
 from django.utils.timezone import now
-from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
 from product.models import Product
 
 
@@ -57,46 +54,15 @@ class AddToCartViewSet(viewsets.ModelViewSet):
     queryset = AddToCart.objects.all()
     serializer_class = AddToCartSerializer
 
-    def get_queryset(self):
-        user = self.request.user
-
-        # Check if a user_id is passed in the query parameters
-        user_id = self.request.query_params.get("user_id")
-
-        if user_id:
-            # Allow access to another user's cart only if the logged-in user has special permissions
-            if user.is_authenticated and (user.is_staff or user.is_superuser):
-                return AddToCart.objects.filter(user_id=user_id)
-            else:
-                raise PermissionDenied("You do not have permission to view this user's cart.")
-
-        # Default behavior: return the logged-in user's cart
-        if user.is_authenticated:
-            return AddToCart.objects.filter(user_id=user.id)
-        else:
-            raise NotAuthenticated("You must be logged in to view this data.")
-
-    def perform_create(self, serializer):
-        user = self.request.user
-        if not user.is_authenticated:
-            raise NotAuthenticated("You must be logged in to add items to the cart.")
-
-        product_data = self.request.data.get("product")
-        if not product_data or not isinstance(product_data, dict):
-            raise serializers.ValidationError("Invalid product data.")
-
-        product_id = product_data.get("id")
-        if not product_id:
-            raise serializers.ValidationError("Product ID is required.")
-
-        try:
-            product = Product.objects.get(id=product_id)
-        except Product.DoesNotExist:
-            raise serializers.ValidationError("Product not found.")
-
-        # Create the cart item with quantity set to 1
-        serializer.save(user=user, product=product, quantity=1)
-
+    @action(detail=False, methods=['get'], url_path='user/(?P<user_id>[^/.]+)')
+    def by_user_id(self, request, user_id=None):
+        cartItem = AddToCart.objects.filter(user__id=user_id)  # Use filter instead of get to return a queryset
+        
+        if not cartItem.exists():  # Check if the wishlist is empty
+            raise NotFound(detail="You don't have any items in the cart.")
+        
+        serializer = self.get_serializer(cartItem, many=True)  # Serialize the queryset
+        return Response(serializer.data)
 
 
 # viewset for Checkout
@@ -142,30 +108,18 @@ class PurchaseHistoryViewSet(viewsets.ModelViewSet):
     queryset = PurchaseHistory.objects.all()
     serializer_class = PurchaseHistorySerializer
 
+
 # viewset for wishlist
 class WishlistItemViewSet(viewsets.ModelViewSet):
     queryset = WishlistItem.objects.all()
     serializer_class = WishlistItemSerializer
 
-    def get_queryset(self):
-        user = self.request.user
-
-        # Ensure the user is authenticated
-        if not user.is_authenticated:
-            raise NotAuthenticated("You must be logged in to view this data.")
-
-        # Check if a user_id is passed in the query parameters
-        user_id = self.request.query_params.get("user_id")
-
-        if user_id:
-            # Allow access to other users' wishlist only if the logged-in user has special permissions (e.g., is_staff)
-            if user.is_staff or user.is_superuser:
-                return WishlistItem.objects.filter(user_id=user_id)  # Filter by user_id in query parameters
-            else:
-                raise PermissionDenied("You do not have permission to view this user's wishlist.")
-
-        # Default behavior: return the logged-in user's wishlist
-        return WishlistItem.objects.filter(user_id=user.id)
-
-
-
+    @action(detail=False, methods=['get'], url_path='user/(?P<user_id>[^/.]+)')
+    def by_user_id(self, request, user_id=None):
+        wishlist = WishlistItem.objects.filter(user__id=user_id)  # Use filter instead of get to return a queryset
+        
+        if not wishlist.exists():  # Check if the wishlist is empty
+            raise NotFound(detail="You don't have any wishlist items.")
+        
+        serializer = self.get_serializer(wishlist, many=True)  # Serialize the queryset
+        return Response(serializer.data)
