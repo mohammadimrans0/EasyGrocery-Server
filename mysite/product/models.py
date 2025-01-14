@@ -13,15 +13,6 @@ class Product(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-class ShoppingCart(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='user_cart')
-    created_at = models.DateTimeField(auto_now_add=True)
-
-class CartItem(models.Model):
-    cart = models.ForeignKey(ShoppingCart, on_delete=models.CASCADE, related_name='cart_items')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.PositiveIntegerField()
-
 class ProductReview(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='user_reviews')
     user = models.ForeignKey(User, on_delete=models.CASCADE)
