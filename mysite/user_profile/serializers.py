@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import Profile, Deposit, AddToCart, Checkout, PurchaseHistory, WishlistItem
-# from product.serializers import ProductSerializer
 from product.models import Product
 
 class UserSerializer(serializers.ModelSerializer):
@@ -23,14 +22,14 @@ class ProfileSerializer(serializers.ModelSerializer):
         fields = ['id', 'user', 'image', 'balance', 'contact_info', 'shopping_preferences']
 
     def create(self, validated_data):
-        # Set the default balance to 0 when creating a new profile
+        user_data = validated_data.pop('user')
         validated_data['balance'] = 0.00
         profile = super().create(validated_data)
         return profile
 
 
 class DepositSerializer(serializers.ModelSerializer):
-    user = UserSerializer()
+    user = User
 
     class Meta:
         model = Deposit
@@ -38,7 +37,7 @@ class DepositSerializer(serializers.ModelSerializer):
 
 
 class AddToCartSerializer(serializers.ModelSerializer):
-    user = UserSerializer()
+    user = User
     product = ProductSerializer()
     class Meta:
         model = AddToCart
@@ -61,7 +60,7 @@ class PurchaseHistorySerializer(serializers.ModelSerializer):
 
 
 class WishlistItemSerializer(serializers.ModelSerializer):
-    user = UserSerializer()
+    user = User
     product = ProductSerializer()
     class Meta:
         model = WishlistItem
