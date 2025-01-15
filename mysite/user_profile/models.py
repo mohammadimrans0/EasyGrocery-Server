@@ -26,11 +26,13 @@ class Deposit(models.Model):
 class AddToCart(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='cart')
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product_name = models.CharField(max_length=255, blank=True, null=True)
+    product_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     quantity = models.PositiveIntegerField(default=1)
     added_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.quantity} x {self.product.name} in {self.user.username}'s cart"
+        return f"{self.quantity} x {self.product_name} in {self.user.username}'s cart"
 
     def clean(self):
         if self.quantity <= 0:
@@ -63,6 +65,7 @@ class PurchaseHistory(models.Model):
 class WishlistItem(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='wishlist')
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product_name = models.CharField(max_length=255, blank=True, null=True)
     added_at = models.DateTimeField(auto_now_add=True)
     
 

@@ -56,12 +56,12 @@ class AddToCartViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'], url_path='user/(?P<user_id>[^/.]+)')
     def by_user_id(self, request, user_id=None):
-        cartItem = AddToCart.objects.filter(user__id=user_id)  # Use filter instead of get to return a queryset
+        cartItem = AddToCart.objects.filter(user__id=user_id)
         
-        if not cartItem.exists():  # Check if the wishlist is empty
+        if not cartItem.exists():
             raise NotFound(detail="You don't have any items in the cart.")
         
-        serializer = self.get_serializer(cartItem, many=True)  # Serialize the queryset
+        serializer = self.get_serializer(cartItem, many=True)
         return Response(serializer.data)
 
 
@@ -115,11 +115,10 @@ class WishlistItemViewSet(viewsets.ModelViewSet):
     serializer_class = WishlistItemSerializer
 
     @action(detail=False, methods=['get'], url_path='user/(?P<user_id>[^/.]+)')
-    def by_user_id(self, request, user_id=None):
-        wishlist = WishlistItem.objects.filter(user__id=user_id)  # Use filter instead of get to return a queryset
-        
-        if not wishlist.exists():  # Check if the wishlist is empty
-            raise NotFound(detail="You don't have any wishlist items.")
-        
-        serializer = self.get_serializer(wishlist, many=True)  # Serialize the queryset
+    def by_user_id(self, request, user_id):
+        wishlist = WishlistItem.objects.filter(user__id=user_id)
+        if not wishlist.exists():
+            raise NotFound(detail=f"No wishlist items found for user ID {user_id}.")
+
+        serializer = self.get_serializer(wishlist, many=True)
         return Response(serializer.data)
