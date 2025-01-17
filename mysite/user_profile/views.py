@@ -13,7 +13,6 @@ from django.contrib.auth.models import User
 from django.utils.timezone import now
 from product.models import Product
 
-
 # Viewset for Profile
 class ProfileViewSet(viewsets.ModelViewSet):
     queryset = Profile.objects.all()

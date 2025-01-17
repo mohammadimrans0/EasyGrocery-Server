@@ -3,8 +3,14 @@ from django.contrib.auth.models import User
 from .models import Profile, Deposit, AddToCart, Checkout, PurchaseHistory, WishlistItem
 
 
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'first_name', 'last_name', 'email']
+        
+
 class ProfileSerializer(serializers.ModelSerializer):
-    user = User
+    user = UserSerializer()
     balance = serializers.DecimalField(max_digits=10, decimal_places=2)
 
     class Meta:
