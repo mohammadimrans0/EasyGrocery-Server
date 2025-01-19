@@ -38,7 +38,7 @@ class AddToCartSerializer(serializers.ModelSerializer):
 class CheckoutSerializer(serializers.ModelSerializer):
     class Meta:
         model = Checkout
-        fields = ['id', 'user', 'total_amount', 'created_at']
+        fields = ['id', 'user', 'total_amount']
 
 class PurchaseHistorySerializer(serializers.ModelSerializer):
     class Meta:

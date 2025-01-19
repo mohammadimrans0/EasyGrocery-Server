@@ -4,7 +4,7 @@ from product.models import Product
 
 # Create your models here.
 class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='user')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     image = models.ImageField(upload_to='user_profile/upload/images/', default='user_profile/upload/images/avatar.jpg')
     contact_info = models.CharField(max_length=255, blank=True, null=True)
     balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
@@ -47,8 +47,8 @@ class Checkout(models.Model):
         profile = self.user.profile
         if profile.balance >= self.total_amount:
             profile.balance -= self.total_amount
-            profile.save()  # Save the updated balance
-            super().save(*args, **kwargs)  # Call the parent save method
+            profile.save()
+            super().save(*args, **kwargs)
         else:
             raise ValidationError("Insufficient balance for checkout.")
 

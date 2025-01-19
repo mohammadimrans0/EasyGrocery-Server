@@ -1,15 +1,11 @@
 from rest_framework import viewsets
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.response import Response
-from rest_framework.generics import RetrieveAPIView
-from rest_framework.exceptions import NotFound
-from rest_framework.exceptions import NotAuthenticated
-from rest_framework.decorators import action
 from rest_framework import status
 from django.db import transaction
 
 from .models import Profile, Deposit, AddToCart, Checkout, PurchaseHistory, WishlistItem
 from .serializers import ProfileSerializer, DepositSerializer, AddToCartSerializer, CheckoutSerializer, PurchaseHistorySerializer, WishlistItemSerializer
-from django.contrib.auth.models import User
 from django.utils.timezone import now
 from product.models import Product
 
@@ -17,16 +13,8 @@ from product.models import Product
 class ProfileViewSet(viewsets.ModelViewSet):
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
-
-    @action(detail=False, methods=['get'], url_path='user/(?P<user_id>[^/.]+)')
-    def by_user_id(self, request, user_id=None):
-        try:
-            profile = Profile.objects.get(user__id=user_id)
-        except Profile.DoesNotExist:
-            raise NotFound(detail="Profile not found for the given user ID")
-        serializer = self.get_serializer(profile)
-        return Response(serializer.data)
-
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['user']
 
 # Viewset for Deposit money
 class DepositViewSet(viewsets.ModelViewSet):
@@ -52,16 +40,8 @@ class DepositViewSet(viewsets.ModelViewSet):
 class AddToCartViewSet(viewsets.ModelViewSet):
     queryset = AddToCart.objects.all()
     serializer_class = AddToCartSerializer
-
-    @action(detail=False, methods=['get'], url_path='user/(?P<user_id>[^/.]+)')
-    def by_user_id(self, request, user_id=None):
-        cartItem = AddToCart.objects.filter(user__id=user_id)
-        
-        if not cartItem.exists():
-            raise NotFound(detail="You don't have any items in the cart.")
-        
-        serializer = self.get_serializer(cartItem, many=True)
-        return Response(serializer.data)
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['user']
 
 
 # viewset for Checkout
@@ -70,54 +50,49 @@ class CheckoutViewSet(viewsets.ModelViewSet):
     serializer_class = CheckoutSerializer
 
     def perform_create(self, serializer):
-        user = serializer.validated_data['user']
+        user = self.request.user
         total_amount = serializer.validated_data['total_amount']
 
-        # Calculate total amount from the cart
+        # Fetch the user's cart items
         cart_items = AddToCart.objects.filter(user=user)
-        calculated_total = sum(item.product.price * item.quantity for item in cart_items)  # Assuming product.price exists
 
-        if calculated_total != total_amount:
-            raise ValidationError("The total amount provided does not match the calculated total.")
+        if not cart_items.exists():
+            raise ValidationError("Your cart is empty. Please add items before checkout.")
 
         # Deduct balance
         profile = user.profile
-        if profile.balance >= calculated_total:
-            profile.balance -= calculated_total
+        if profile.balance >= total_amount:
+            profile.balance -= total_amount
             profile.save()
 
             # Save the checkout
-            checkout_instance = serializer.save()
+            checkout_instance = serializer.save(user=user)
 
-            # Create purchase history and clear cart
+            # Add cart items to purchase history and clear the cart
             for item in cart_items:
                 PurchaseHistory.objects.create(
                     user=user,
                     product=item.product,
                     purchased_at=now()
                 )
-            cart_items.delete()
+            cart_items.delete()  # Clear the cart
 
         else:
             raise ValidationError("Insufficient balance for checkout.")
+
 
 
 # Viewset for Purchase History
 class PurchaseHistoryViewSet(viewsets.ModelViewSet):
     queryset = PurchaseHistory.objects.all()
     serializer_class = PurchaseHistorySerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['user']
 
 
 # viewset for wishlist
 class WishlistItemViewSet(viewsets.ModelViewSet):
     queryset = WishlistItem.objects.all()
     serializer_class = WishlistItemSerializer
-
-    @action(detail=False, methods=['get'], url_path='user/(?P<user_id>[^/.]+)')
-    def by_user_id(self, request, user_id):
-        wishlist = WishlistItem.objects.filter(user__id=user_id)
-        if not wishlist.exists():
-            raise NotFound(detail=f"No wishlist items found for user ID {user_id}.")
-
-        serializer = self.get_serializer(wishlist, many=True)
-        return Response(serializer.data)
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['user']
