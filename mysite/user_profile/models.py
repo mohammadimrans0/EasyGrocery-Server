@@ -44,7 +44,7 @@ class Checkout(models.Model):
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
 
     def save(self, *args, **kwargs):
-        profile = self.user.profile
+        profile, created = Profile.objects.get_or_create(user=self.user)
         if profile.balance >= self.total_amount:
             profile.balance -= self.total_amount
             profile.save()
