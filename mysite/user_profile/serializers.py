@@ -36,6 +36,7 @@ class AddToCartSerializer(serializers.ModelSerializer):
         fields = ['id', 'user', 'product', 'product_name', 'product_price', 'quantity', 'added_at']
 
 class CheckoutSerializer(serializers.ModelSerializer):
+    serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
     class Meta:
         model = Checkout
         fields = ['id', 'user', 'total_amount']
