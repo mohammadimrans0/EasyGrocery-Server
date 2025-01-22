@@ -4,6 +4,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.db import transaction
 from django.core.exceptions import ValidationError
+from rest_framework.permissions import IsAuthenticated
+from django.core.exceptions import ObjectDoesNotExist
 
 from .models import Profile, Deposit, AddToCart, Checkout, PurchaseHistory, WishlistItem
 from .serializers import ProfileSerializer, DepositSerializer, AddToCartSerializer, CheckoutSerializer, PurchaseHistorySerializer, WishlistItemSerializer
@@ -49,9 +51,13 @@ class AddToCartViewSet(viewsets.ModelViewSet):
 class CheckoutViewSet(viewsets.ModelViewSet):
     queryset = Checkout.objects.all()
     serializer_class = CheckoutSerializer
+    permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
         user = self.request.user
+        if not user.is_authenticated:
+            raise ValidationError("You must be logged in to checkout.")
+        
         total_amount = serializer.validated_data['total_amount']
 
         # Fetch the user's cart items
@@ -60,8 +66,13 @@ class CheckoutViewSet(viewsets.ModelViewSet):
         if not cart_items.exists():
             raise ValidationError("Your cart is empty. Please add items before checkout.")
 
+        # Fetch the user's profile
+        try:
+            profile = Profile.objects.get(user=user)
+        except ObjectDoesNotExist:
+            raise ValidationError("Profile not found for the logged-in user.")
+
         # Deduct balance
-        profile = user.profile
         if profile.balance >= total_amount:
             profile.balance -= total_amount
             profile.save()
@@ -80,7 +91,6 @@ class CheckoutViewSet(viewsets.ModelViewSet):
 
         else:
             raise ValidationError("Insufficient balance for checkout.")
-
 
 
 # Viewset for Purchase History
