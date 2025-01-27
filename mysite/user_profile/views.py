@@ -5,12 +5,17 @@ from rest_framework import status
 from django.db import transaction
 from django.core.exceptions import ValidationError
 from django.core.exceptions import ObjectDoesNotExist
+from django.shortcuts import get_object_or_404
+from django.utils.timezone import now
 
 from .models import Profile, Deposit, AddToCart, Checkout, PurchaseHistory, WishlistItem
-from .serializers import ProfileSerializer, DepositSerializer, AddToCartSerializer, CheckoutSerializer, PurchaseHistorySerializer, WishlistItemSerializer
-from django.utils.timezone import now
+from .serializers import UserSerializer, ProfileSerializer, DepositSerializer, AddToCartSerializer, CheckoutSerializer, PurchaseHistorySerializer, WishlistItemSerializer
 from product.models import Product
 from django.contrib.auth.models import User
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
 
 # Viewset for Profile
 class ProfileViewSet(viewsets.ModelViewSet):
@@ -53,7 +58,7 @@ class CheckoutViewSet(viewsets.ModelViewSet):
     serializer_class = CheckoutSerializer
 
     def perform_create(self, serializer):
-        user = self.request.user
+        user = serializer.validated_data['user']  # The user is already the User object, not user_id
         total_amount = serializer.validated_data['total_amount']
 
         # Fetch the user's cart items
