@@ -1,54 +1,48 @@
-from rest_framework import serializers, status
+from contextvars import Token
+from rest_framework import viewsets
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.authtoken.models import Token
+from rest_framework import status
+from django.db import transaction
+from django.core.exceptions import ValidationError
+from django.core.exceptions import ObjectDoesNotExist
+from django.utils.timezone import now
+from django.contrib.auth import login, authenticate, logout
 
-from .serializers import RegistrationSerializer, UserLoginSerializer, ResetPasswordSerializer
-
-from django.contrib.auth.tokens import default_token_generator
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.utils.encoding import force_bytes
+from .models import Profile, Deposit, AddToCart, Checkout, PurchaseHistory, WishlistItem
+from .serializers import ResetPasswordSerializer, SignupSerializer, UserLoginSerializer, UserSerializer, ProfileSerializer, DepositSerializer, AddToCartSerializer, CheckoutSerializer, PurchaseHistorySerializer, WishlistItemSerializer
 from django.contrib.auth.models import User
-from django.contrib.auth import authenticate, login, logout
 
-# For sending email
-from django.core.mail import EmailMultiAlternatives
-from django.template.loader import render_to_string
-from django.http import HttpResponse
-from django.urls import reverse
+# user viewset
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    
 
-# User registration
-class UserRegistrationApiView(APIView):
-    serializer_class = RegistrationSerializer
+# profile viewset
+class ProfileViewSet(viewsets.ModelViewSet):
+    queryset = Profile.objects.all()
+    serializer_class = ProfileSerializer
 
-    def post(self, request):
-        serializer = self.serializer_class(data=request.data)
+    def get_queryset(self):
+        if self.action in ['update', 'partial_update']:
+            return Profile.objects.all()
+        return super().get_queryset()
 
+    def perform_create(self, serializer):
+        serializer.save()
+
+# signup user
+class SignupViewSet(viewsets.ViewSet):
+    serializer_class = SignupSerializer
+
+    def create(self, request):
+        serializer = SignupSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
-
-            # Create token and activation URL
-            token = default_token_generator.make_token(user)
-            uid = urlsafe_base64_encode(force_bytes(user.pk))
-
-            # Generate activation URL dynamically
-            confirm_link = request.build_absolute_uri(
-                reverse('activate', kwargs={'uid64': uid, 'token': token})
-            )
-
-            # Email content
-            email_subject = "Confirm Your Email"
-            email_body = render_to_string('confirm_email.html', {'confirm_link': confirm_link, 'user': user})
-            
-            try:
-                email = EmailMultiAlternatives(email_subject, '', to=[user.email])
-                email.attach_alternative(email_body, "text/html")
-                email.send()
-            except Exception as e:
-                return Response({"error": f"Failed to send email: {str(e)}"})
-
-            return Response("Check your email. We've sent a confirmation mail. Click on the link to activate your account.")
-        return Response(serializer.errors)
+            return Response({"detail": "User created successfully."}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 # Login user
@@ -69,17 +63,15 @@ class UserLoginApiView(APIView):
             else:
                 return Response({'error': "Invalid Username or Password"})
         return Response(serializer.errors)
-
+    
 
 # Logout user
 class UserLogoutApiView(APIView):
-    def get(self, request):
+    def post(self, request):
         if hasattr(request.user, 'auth_token'):
             request.user.auth_token.delete()
-            logout(request)
-            return Response({"message": "Logout successful."})
-        else:
-            return Response({"error": "No active session or token found."})
+        logout(request)
+        return Response({"message": "Logout successful."})
 
 
 # reset password
@@ -90,19 +82,89 @@ class ResetPasswordView(APIView):
             serializer.save()
             return Response({"message": "Password reset successful."}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+# Viewset for Deposit money
+class DepositViewSet(viewsets.ModelViewSet):
+    queryset = Deposit.objects.all()
+    serializer_class = DepositSerializer
+
+    def perform_create(self, serializer):
+        # using transaction to ensure atomicity
+        with transaction.atomic():
+            deposit = serializer.save()
+
+            profile = Profile.objects.get(user=deposit.user)
+            profile.balance += deposit.amount
+            profile.save()
+
+            return Response({
+                'message': 'Deposit successful',
+                'balance': profile.balance
+            }, status=status.HTTP_201_CREATED)
 
 
-# Activate account
-def activate(request, uid64, token):
-    try:
-        uid = urlsafe_base64_decode(uid64).decode()
-        user = User._default_manager.get(pk=uid)
-    except (User.DoesNotExist, ValueError, TypeError):
-        user = None
+# add to cart
+class AddToCartViewSet(viewsets.ModelViewSet):
+    queryset = AddToCart.objects.all()
+    serializer_class = AddToCartSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['user']
 
-    if user is not None and default_token_generator.check_token(user, token):
-        user.is_active = True
-        user.save()
-        return HttpResponse("Account activated successfully. You can now log in.")
-    else:
-        return HttpResponse("Invalid activation link.")
+
+# viewset for Checkout
+class CheckoutViewSet(viewsets.ModelViewSet):
+    queryset = Checkout.objects.all()
+    serializer_class = CheckoutSerializer
+
+    def perform_create(self, serializer):
+        user = serializer.validated_data['user']  # The user is already the User object, not user_id
+        total_amount = serializer.validated_data['total_amount']
+
+        # Fetch the user's cart items
+        cart_items = AddToCart.objects.filter(user=user)
+
+        if not cart_items.exists():
+            raise ValidationError("Your cart is empty. Please add items before checkout.")
+
+        # Fetch the user's profile
+        try:
+            profile = Profile.objects.get(user=user)
+        except ObjectDoesNotExist:
+            raise ValidationError("Profile not found for the logged-in user.")
+
+        # Deduct balance
+        if profile.balance >= total_amount:
+            profile.balance -= total_amount
+            profile.save()
+
+            # Save the checkout
+            checkout_instance = serializer.save(user=user)
+
+            # Add cart items to purchase history and clear the cart
+            for item in cart_items:
+                PurchaseHistory.objects.create(
+                    user=user,
+                    product=item.product,
+                    purchased_at=now()
+                )
+            cart_items.delete()
+
+        else:
+            raise ValidationError("Insufficient balance for checkout.")
+
+
+# Viewset for Purchase History
+class PurchaseHistoryViewSet(viewsets.ModelViewSet):
+    queryset = PurchaseHistory.objects.all()
+    serializer_class = PurchaseHistorySerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['user']
+
+
+# viewset for wishlist
+class WishlistItemViewSet(viewsets.ModelViewSet):
+    queryset = WishlistItem.objects.all()
+    serializer_class = WishlistItemSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['user']
