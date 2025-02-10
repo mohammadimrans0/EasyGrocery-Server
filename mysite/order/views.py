@@ -1,7 +1,7 @@
 from rest_framework import viewsets
-from django.utils.timezone import now
 from django.forms import ValidationError
 from django.core.exceptions import ObjectDoesNotExist
+from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import AddToCart, Checkout, PurchaseHistory
 from .serializers import AddToCartSerializer, CheckoutSerializer, PurchaseHistorySerializer
@@ -43,6 +43,9 @@ def payment_int(user, total_amount, cart_items, product_name, product_category, 
         'cus_phone': cus_phone,
         'product_name': product_name,
         'product_category': product_category,
+        'cus_add1': "customer address",
+        'cus_city': "Dhaka",
+        'cus_country': "Bangladesh",
         'product_profile': "general",
         'shipping_method': "NO",
         'num_of_item': len(cart_items),
@@ -88,20 +91,20 @@ class CheckoutViewSet(viewsets.ModelViewSet):
         # Save the checkout
         checkout = serializer.save(user=user)
 
-        # Add cart items to purchase history and clear the cart
-        for item in cart_items:
-            PurchaseHistory.objects.create(
-                user=user,
-                product=item.product,
-                purchased_at=now()
-            )
-        cart_items.delete()
-
         # Call the payment initiation function
         payment_url = payment_int(user, total_amount, cart_items, product_name, product_category, checkout)
 
         # Check if payment URL is returned
         if payment_url:
+            # Add cart items to purchase history and clear the cart
+            for item in cart_items:
+                PurchaseHistory.objects.create(
+                    user= user,
+                    product= item.product,
+                    purchased_at= timezone.now()
+                )
+                cart_items.delete()
+
             return JsonResponse({"payment_url": payment_url})
         else:
             return JsonResponse({"error": "Failed to initiate payment"}, status=400)
