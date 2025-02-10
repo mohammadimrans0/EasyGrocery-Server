@@ -48,6 +48,8 @@ INSTALLED_APPS = [
     'user',
     'category',
     'product',
+    'order',
+    'payments',
 ]
 
 CSRF_COOKIE_SECURE = False
@@ -156,3 +158,15 @@ EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 EMAIL_HOST_USER = env('HOST_EMAIL')
 EMAIL_HOST_PASSWORD = env('HOST_EMAIL_PASSWORD')
+
+
+# Payment Gateway
+SSLCOMMERZ = {
+    "STORE_ID": "testbox",
+    "STORE_PASSWORD": "qwerty",
+    "ISSANDBOX": True,
+    "CURRENCY": "BDT",
+    "SUCCESS_URL": "http://127.0.0.1:8000/api/order/payment/success/",
+    "FAIL_URL": "http://127.0.0.1:8000/api/order/payment/fail/",
+    "CANCEL_URL": "http://127.0.0.1:8000/api/order/payment/cancel/",
+}

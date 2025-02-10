@@ -1,22 +1,22 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Profile, Deposit, AddToCart, Checkout, PurchaseHistory, WishlistItem
+from .models import Profile, WishlistItem
 from django.core.exceptions import ObjectDoesNotExist
 
-
+# user serializer
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'email']
         
-
+# profile serializer
 class ProfileSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
     balance = serializers.DecimalField(max_digits=10, decimal_places=2)
 
     class Meta:
         model = Profile
-        fields = ['id', 'user', 'name', 'image', 'balance', 'contact_info', 'shopping_preferences']
+        fields = ['id', 'user', 'name', 'image', 'contact_info', 'shopping_preferences']
 
 # Signup Serializer
 class SignupSerializer(serializers.ModelSerializer):
@@ -67,7 +67,7 @@ class ResetPasswordSerializer(serializers.Serializer):
 
         # Check if user exists
         try:
-            user = User.objects.get(username=username)
+            User.objects.get(username=username)
         except ObjectDoesNotExist:
             raise serializers.ValidationError({"username": "User does not exist."})
 
@@ -87,43 +87,9 @@ class ResetPasswordSerializer(serializers.Serializer):
 
         return user
 
-class DepositSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Deposit
-        fields = ['user', 'amount', 'created_at']
-
-class AddToCartSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = AddToCart
-        fields = ['id', 'user', 'product', 'product_name', 'product_price', 'quantity', 'added_at']
-
-class CheckoutSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Checkout
-        fields = ['id', 'user', 'total_amount']
-        
-
-class PurchaseHistorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = PurchaseHistory
-        fields = ('id', 'user', 'product', 'purchased_at')
-
+# wishlist item serializer
 class WishlistItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = WishlistItem
-        fields = ['id', 'user', 'product', 'product_name']
+        fields = ['id', 'user', 'product']
 
-
-
-
-"""
-{
-    "user": 1,
-    "product": {
-        "name": "Apple",
-        "price": 350.00,
-        "stock": 50
-    }
-}
-
-"""
