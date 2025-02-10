@@ -12,7 +12,6 @@ class UserSerializer(serializers.ModelSerializer):
 # profile serializer
 class ProfileSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
-    balance = serializers.DecimalField(max_digits=10, decimal_places=2)
 
     class Meta:
         model = Profile
