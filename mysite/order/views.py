@@ -1,5 +1,6 @@
 from rest_framework import viewsets
 from django.forms import ValidationError
+from rest_framework.response import Response
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
@@ -10,7 +11,6 @@ from user.models import Profile
 # Import SSLCommerz library
 from sslcommerz_lib import SSLCOMMERZ
 from django.conf import settings
-from django.http import JsonResponse
 
 
 # Payment Initiation Function
@@ -54,8 +54,6 @@ def payment_int(user, total_amount, cart_items, product_name, product_category, 
     # Create the payment session
     response = sslcz.createSession(post_body)
 
-    print(response)
-
     # Check if payment session was successfully created
     if 'GatewayPageURL' in response:
         return response['GatewayPageURL']
@@ -71,7 +69,8 @@ class CheckoutViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = request.user
+        # user = request.user
+        user = serializer.validated_data['user']
         total_amount = serializer.validated_data['total_amount']
 
         # Fetch the user's cart items
@@ -105,9 +104,9 @@ class CheckoutViewSet(viewsets.ModelViewSet):
                 )
                 cart_items.delete()
 
-            return JsonResponse({"payment_url": payment_url})
+            return Response({"payment_url": payment_url})
         else:
-            return JsonResponse({"error": "Failed to initiate payment"}, status=400)
+            return Response({"error": "Failed to initiate payment"}, status=400)
         
 
 # Add to cart viewset
