@@ -6,7 +6,7 @@ from product.models import Product
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     name = models.CharField(max_length=255, blank=True, null=True)
-    image = models.ImageField(upload_to='upload/user/images/', default='upload/user/images/avatar.jpg')
+    image = models.ImageField(upload_to='upload/user/images/', default='upload/user/images/avatar.png')
     contact_info = models.CharField(max_length=255, blank=True, null=True)
     shopping_preferences = models.TextField(blank=True, null=True)
 

@@ -136,3 +136,9 @@ def sslcommerz_payment_fail(request):
 
 def sslcommerz_payment_cancel(request):
     return JsonResponse({"message": "Payment cancelled", "data": request.GET})
+
+
+# {
+# "username": "rahims0",
+# "password": "rahi1234"
+# }
