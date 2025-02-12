@@ -166,7 +166,4 @@ SSLCOMMERZ = {
     "STORE_PASSWORD": "qwerty",
     "ISSANDBOX": True,
     "CURRENCY": "BDT",
-    "SUCCESS_URL": "https://easygrocery.vercel.app/payment/success",
-    "FAIL_URL": "https://easygrocery.vercel.app/payment/fail",
-    "CANCEL_URL": "https://easygrocery.vercel.app/payment/cancel",
 }

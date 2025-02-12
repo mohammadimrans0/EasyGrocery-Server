@@ -7,6 +7,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from .models import AddToCart, Checkout, PurchaseHistory
 from .serializers import AddToCartSerializer, CheckoutSerializer, PurchaseHistorySerializer
 from user.models import Profile
+from django.shortcuts import redirect
 
 # Import SSLCommerz library
 from sslcommerz_lib import SSLCOMMERZ
@@ -34,9 +35,9 @@ def payment_int(user, total_amount, cart_items, product_name, product_category, 
         'total_amount': str(total_amount),
         'currency': settings.SSLCOMMERZ["CURRENCY"],
         'tran_id': f"TXN_{user.id}_{checkout.id}",
-        'success_url': settings.SSLCOMMERZ["SUCCESS_URL"],
-        'fail_url': settings.SSLCOMMERZ["FAIL_URL"],
-        'cancel_url': settings.SSLCOMMERZ["CANCEL_URL"],
+        'success_url': "https://easygrocery-server.onrender.com/api/order/payment/success/",
+        'fail_url': "https://easygrocery-server.onrender.com/api/order/payment/fail/",
+        'cancel_url': "https://easygrocery-server.onrender.com/api/order/payment/cancel/",
         'emi_option': 0,
         'cus_name': cus_name,
         'cus_email': user.email,
@@ -125,19 +126,13 @@ class PurchaseHistoryViewSet(viewsets.ModelViewSet):
     filterset_fields = ['user']
 
 
-def sslcommerz_payment_success(request):
-    return JsonResponse({"message": "Payment successful", "data": request.GET})
+def payment_success(request):
+    return redirect("https://easygrocery.vercel.app/payment/success")
 
 
-def sslcommerz_payment_fail(request):
-    return JsonResponse({"message": "Payment failed", "data": request.GET})
+def payment_fail(request):
+    return redirect("https://easygrocery.vercel.app/payment/fail")
 
 
-def sslcommerz_payment_cancel(request):
-    return JsonResponse({"message": "Payment cancelled", "data": request.GET})
-
-
-# {
-# "username": "rahims0",
-# "password": "rahi1234"
-# }
+def payment_cancel(request):
+    return redirect("https://easygrocery.vercel.app/payment/cancel")
