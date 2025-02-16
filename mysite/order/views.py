@@ -12,7 +12,7 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import action
 
 # Import SSLCommerz library
-from sslcommerz_lib import SSLCOMMERZ
+# from sslcommerz_lib import SSLCOMMERZ
 from django.conf import settings
 
 
