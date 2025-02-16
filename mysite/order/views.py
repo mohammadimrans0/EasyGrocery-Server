@@ -8,6 +8,8 @@ from .models import AddToCart, Checkout, PurchaseHistory
 from .serializers import AddToCartSerializer, CheckoutSerializer, PurchaseHistorySerializer
 from user.models import Profile
 from django.shortcuts import redirect
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework.decorators import action
 
 # Import SSLCommerz library
 from sslcommerz_lib import SSLCOMMERZ
@@ -35,6 +37,9 @@ def payment_int(user, total_amount, cart_items, product_name, product_category, 
         'total_amount': str(total_amount),
         'currency': settings.SSLCOMMERZ["CURRENCY"],
         'tran_id': f"TXN_{user.id}_{checkout.id}",
+        # 'success_url': "http://127.0.0.1:8000/api/order/payment/success",
+        # 'fail_url': "http://127.0.0.1:8000/api/order/payment/fail",
+        # 'cancel_url': "http://127.0.0.1:8000/api/order/payment/cancel",
         'success_url': "https://easygrocery-server.onrender.com/api/order/payment/success/",
         'fail_url': "https://easygrocery-server.onrender.com/api/order/payment/fail/",
         'cancel_url': "https://easygrocery-server.onrender.com/api/order/payment/cancel/",
@@ -126,13 +131,19 @@ class PurchaseHistoryViewSet(viewsets.ModelViewSet):
     filterset_fields = ['user']
 
 
+@csrf_exempt
+@action(detail=False, methods=['post'])
 def payment_success(request):
     return redirect("https://easygrocery.vercel.app/payment/success")
 
 
+@csrf_exempt
+@action(detail=False, methods=['post'])
 def payment_fail(request):
     return redirect("https://easygrocery.vercel.app/payment/fail")
 
 
+@csrf_exempt
+@action(detail=False, methods=['post'])
 def payment_cancel(request):
     return redirect("https://easygrocery.vercel.app/payment/cancel")
