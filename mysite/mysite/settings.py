@@ -86,7 +86,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'mysite.wsgi.app'
+WSGI_APPLICATION = 'mysite.wsgi.application'
 
 
 # Database
@@ -94,8 +94,15 @@ WSGI_APPLICATION = 'mysite.wsgi.app'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',  
+        'NAME': 'neondb',                         
+        'USER': 'neondb_owner',                   
+        'PASSWORD': 'npg_i5JZSTWt6OAa',   
+        'HOST': 'ep-misty-pine-a1vrheva-pooler.ap-southeast-1.aws.neon.tech', 
+        'PORT': 5432,                          
+        'OPTIONS': {
+            'sslmode': 'require', 
+        },
     }
 }
 
