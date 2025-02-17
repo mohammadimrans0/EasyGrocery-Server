@@ -10,7 +10,7 @@ from .serializers import ResetPasswordSerializer, SignupSerializer, UserLoginSer
 from django.contrib.auth.models import User
 
 # user viewset
-class UserViewSet(viewsets.ModelViewSet):
+class UserViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     

@@ -3,6 +3,7 @@ from .models import Product, ProductReview
 
 
 class ProductSerializer(serializers.ModelSerializer):
+    image = serializers.ImageField()
     class Meta:
         model = Product
         fields = ['id', 'name', 'image', 'description', 'price', 'stock', 'category', 'product_owner']

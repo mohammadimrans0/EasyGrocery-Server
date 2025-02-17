@@ -12,6 +12,7 @@ class UserSerializer(serializers.ModelSerializer):
 # profile serializer
 class ProfileSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
+    image = serializers.ImageField()
     class Meta:
         model = Profile
         fields = ['id', 'user', 'name', 'image', 'contact_info', 'shopping_preferences']

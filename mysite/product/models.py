@@ -1,10 +1,11 @@
 from django.db import models
 from category.models import Category
 from django.contrib.auth.models import User
+from cloudinary.models import CloudinaryField
 
 class Product(models.Model):
     name = models.CharField(max_length=255)
-    image = models.ImageField(upload_to='upload/product/images/')
+    image = CloudinaryField("image", folder="easygrocery/product")
     description = models.TextField(blank=True, null=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='categories')
     price = models.DecimalField(max_digits=10, decimal_places=2)

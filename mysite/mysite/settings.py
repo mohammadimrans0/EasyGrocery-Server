@@ -1,9 +1,9 @@
 
 from pathlib import Path
-# from environ import Env
+from environ import Env
 
-# env = Env()
-# Env.read_env()
+env = Env()
+Env.read_env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -36,7 +36,14 @@ CORS_ALLOW_ALL_ORIGINS = True
 # Application definition
 
 INSTALLED_APPS = [
+    # vercel requirement
     "whitenoise.runserver_nostatic",
+
+    # cloud
+    "cloudinary",
+    "cloudinary_storage",
+
+    # system app
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -44,9 +51,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',
+
+    # drf
     'rest_framework',
     'django_filters',
     'rest_framework.authtoken',
+
+    # project app
     'user',
     'category',
     'product',
@@ -167,8 +178,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
-# EMAIL_HOST_USER = env('HOST_EMAIL')
-# EMAIL_HOST_PASSWORD = env('HOST_EMAIL_PASSWORD')
+EMAIL_HOST_USER = env('HOST_EMAIL')
+EMAIL_HOST_PASSWORD = env('HOST_EMAIL_PASSWORD')
 
 
 # Payment Gateway
@@ -178,3 +189,13 @@ SSLCOMMERZ = {
     "ISSANDBOX": True,
     "CURRENCY": "BDT",
 }
+
+# Cloudinary Storage
+CLOUDINARY_STORAGE = {
+    "CLOUD_NAME": env('CLOUDINARY_CLOUD_NAME'),
+    "API_KEY": env('CLOUDINARY_API_KEY'),
+    "API_SECRET": env('CLOUDINARY_API_SECRET')
+}
+
+# Use Cloudinary for media file storage
+DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
