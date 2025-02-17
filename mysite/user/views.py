@@ -19,6 +19,8 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
 class ProfileViewSet(viewsets.ModelViewSet):
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['user']
 
     def get_queryset(self):
         if self.action in ['update', 'partial_update']:
