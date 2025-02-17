@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     # vercel requirement
     "whitenoise.runserver_nostatic",
 
-    # cloud
+    # cloud image
     "cloudinary",
     "cloudinary_storage",
 
@@ -71,8 +71,6 @@ INSTALLED_APPS = [
     'order',
     'payments',
 ]
-
-CSRF_COOKIE_SECURE = False
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
