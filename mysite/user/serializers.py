@@ -2,9 +2,11 @@ from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import Profile, WishlistItem
 from django.core.exceptions import ObjectDoesNotExist
+from rest_framework.fields import ImageField
 
 # Profile Serializer      
 class ProfileSerializer(serializers.ModelSerializer):
+    image = ImageField(max_length=None, use_url=True)
     class Meta:
         model = Profile
         fields = ['name', 'image', 'contact_info', 'shopping_preferences']
