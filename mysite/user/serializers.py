@@ -3,19 +3,37 @@ from django.contrib.auth.models import User
 from .models import Profile, WishlistItem
 from django.core.exceptions import ObjectDoesNotExist
 
-# user serializer
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['id', 'username', 'email']
-        
-# profile serializer
+# Profile Serializer      
 class ProfileSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
-    image = serializers.ImageField()
     class Meta:
         model = Profile
-        fields = ['id', 'user', 'name', 'image', 'contact_info', 'shopping_preferences']
+        fields = ['name', 'image', 'contact_info', 'shopping_preferences']
+
+
+# User Serializer
+class UserSerializer(serializers.ModelSerializer):
+    profile = ProfileSerializer()
+
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'profile']
+
+    def update(self, instance, validated_data):
+        profile_data = validated_data.pop('profile', None)  # Fix: Use `.pop('profile', None)` to prevent crashes
+        profile = instance.profile
+
+        instance.email = validated_data.get('email', instance.email)
+        instance.save()
+
+        if profile_data:  # Fix: Ensure profile_data exists before updating
+            profile.name = profile_data.get('name', profile.name)
+            profile.image = profile_data.get('image', profile.image)
+            profile.contact_info = profile_data.get('contact_info', profile.contact_info)
+            profile.shopping_preferences = profile_data.get('shopping_preferences', profile.shopping_preferences)
+            profile.save()
+
+        return instance
+
 
 # Signup Serializer
 class SignupSerializer(serializers.ModelSerializer):

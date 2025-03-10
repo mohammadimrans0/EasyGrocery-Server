@@ -21,9 +21,7 @@ DEBUG = True
 ALLOWED_HOSTS = ["*"]
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://8000-idx-easygrocery-1735744862938.cluster-7ubberrabzh4qqy2g4z7wgxuw2.cloudworkstations.dev',
     'https://sandbox.sslcommerz.com',
-    'https://easygrocery-server.onrender.com',
     'https://easygrocery-server.vercel.app',
     'https://easygrocery.vercel.app',
     'http://localhost:3000',
@@ -31,9 +29,7 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    'https://8000-idx-easygrocery-1735744862938.cluster-7ubberrabzh4qqy2g4z7wgxuw2.cloudworkstations.dev',
     'https://sandbox.sslcommerz.com',
-    'https://easygrocery-server.onrender.com',
     'https://easygrocery-server.vercel.app',
     'https://easygrocery.vercel.app',
     'http://localhost:3000',
@@ -69,7 +65,6 @@ INSTALLED_APPS = [
     'category',
     'product',
     'order',
-    'payments',
 ]
 
 MIDDLEWARE = [

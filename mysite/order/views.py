@@ -15,6 +15,22 @@ from sslcommerz_lib import SSLCOMMERZ
 from django.conf import settings
 
 
+# Add to cart viewset
+class AddToCartViewSet(viewsets.ModelViewSet):
+    queryset = AddToCart.objects.all()
+    serializer_class = AddToCartSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['user']
+
+
+# Viewset for Purchase History
+class PurchaseHistoryViewSet(viewsets.ModelViewSet):
+    queryset = PurchaseHistory.objects.all()
+    serializer_class = PurchaseHistorySerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['user']
+
+
 # Payment Initiation Function
 def payment_int(user, total_amount, cart_items, product_name, product_category, checkout):
     try:
@@ -112,37 +128,21 @@ class CheckoutViewSet(viewsets.ModelViewSet):
             return Response({"payment_url": payment_url})
         else:
             return Response({"error": "Failed to initiate payment"}, status=400)
-        
-
-# Add to cart viewset
-class AddToCartViewSet(viewsets.ModelViewSet):
-    queryset = AddToCart.objects.all()
-    serializer_class = AddToCartSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['user']
-
-
-# Viewset for Purchase History
-class PurchaseHistoryViewSet(viewsets.ModelViewSet):
-    queryset = PurchaseHistory.objects.all()
-    serializer_class = PurchaseHistorySerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['user']
 
 
 @csrf_exempt
 @action(detail=False, methods=['post'])
 def payment_success(request):
-    return redirect("https://easygrocery.vercel.app/payment/success")
+    return redirect("https://easygrocery.vercel.app/payment/success/")
 
 
 @csrf_exempt
 @action(detail=False, methods=['post'])
 def payment_fail(request):
-    return redirect("https://easygrocery.vercel.app/payment/fail")
+    return redirect("https://easygrocery.vercel.app/payment/fail/")
 
 
 @csrf_exempt
 @action(detail=False, methods=['post'])
 def payment_cancel(request):
-    return redirect("https://easygrocery.vercel.app/payment/cancel")
+    return redirect("https://easygrocery.vercel.app/payment/cancel/")

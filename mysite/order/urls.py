@@ -10,7 +10,7 @@ router.register(r'purchase-history', PurchaseHistoryViewSet, basename='purchase_
 
 urlpatterns = [
     path('', include(router.urls)),
-    path("payment/success", payment_success, name="payment_success"),
-    path("payment/fail", payment_fail, name="payment_fail"),
-    path("payment/cancel", payment_cancel, name="payment_cancel"),
+    path("payment/success/", payment_success, name="payment_success"),
+    path("payment/fail/", payment_fail, name="payment_fail"),
+    path("payment/cancel/", payment_cancel, name="payment_cancel"),
 ]

@@ -1,11 +1,11 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import ResetPasswordView, SignupViewSet, UserLoginApiView, UserLogoutApiView, UserViewSet, ProfileViewSet, WishlistItemViewSet
+from .views import ProfileViewSet, WishlistItemViewSet, SignupViewSet, UserLoginApiView, UserLogoutApiView, ProfileViewSet, WishlistItemViewSet, ResetPasswordView
 
 router = DefaultRouter()
-router.register(r'users', UserViewSet, basename='users')
+# router.register(r'users', UserViewSet, basename='users')
 router.register(r'signup', SignupViewSet, basename='signup')
-router.register(r'profiles', ProfileViewSet, basename='profile')
+router.register(r'profile', ProfileViewSet, basename='profile')
 router.register(r'wishlist', WishlistItemViewSet, basename='wishlist')
 
 
