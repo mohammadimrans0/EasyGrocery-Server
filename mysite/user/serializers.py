@@ -6,10 +6,11 @@ from rest_framework.fields import ImageField
 
 # Profile Serializer      
 class ProfileSerializer(serializers.ModelSerializer):
-    image = ImageField(max_length=None, use_url=True)
+    image = serializers.ImageField(required=False)
+    role = serializers.ChoiceField(choices=Profile.Role.choices, default=Profile.Role.BUYER)
     class Meta:
         model = Profile
-        fields = ['name', 'image', 'contact_info', 'shopping_preferences']
+        fields = ['name', 'image', 'contact_info', 'shopping_preferences', 'role']
 
 
 # User Serializer
@@ -21,17 +22,21 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'email', 'profile']
 
     def update(self, instance, validated_data):
-        profile_data = validated_data.pop('profile', None)  # Fix: Use `.pop('profile', None)` to prevent crashes
+        profile_data = validated_data.pop('profile', {})
         profile = instance.profile
 
         instance.email = validated_data.get('email', instance.email)
+        instance.username = validated_data.get('username', instance.username)
         instance.save()
 
-        if profile_data:  # Fix: Ensure profile_data exists before updating
+        if profile_data:
             profile.name = profile_data.get('name', profile.name)
+            #  if 'image' in profile_data:  # Only update if image is provided
+            #     profile.image = profile_data.get('image', profile.image)
             profile.image = profile_data.get('image', profile.image)
             profile.contact_info = profile_data.get('contact_info', profile.contact_info)
             profile.shopping_preferences = profile_data.get('shopping_preferences', profile.shopping_preferences)
+            profile.role = profile_data.get('role', profile.role)
             profile.save()
 
         return instance

@@ -8,27 +8,12 @@ from django.contrib.auth import login, authenticate, logout
 from .models import Profile, WishlistItem
 from .serializers import ResetPasswordSerializer, SignupSerializer, UserLoginSerializer, UserSerializer, ProfileSerializer, WishlistItemSerializer
 from django.contrib.auth.models import User
-from rest_framework.permissions import IsAuthenticated
     
 
 # profile viewset
 class ProfileViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        """Return the authenticated user as a queryset."""
-        return User.objects.filter(id=self.request.user.id)
-
-    def get_object(self):
-        """Return the authenticated user's profile."""
-        user = self.request.user
-        if not hasattr(user, "profile"):
-            return Response(
-                {"error": "Profile not found for this user."},
-                status=status.HTTP_404_NOT_FOUND
-            )
-        return user
 
 # signup user
 class SignupViewSet(viewsets.ViewSet):
